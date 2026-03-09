@@ -45,8 +45,10 @@
   height: 100%;
   background: rgba(0, 0, 0, 0.6);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 10px;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -59,18 +61,39 @@
   background: white;
   color: #667eea;
   border: none;
-  padding: 12px 24px;
+  padding: 10px 22px;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .viewBtn:hover {
   background: #667eea;
   color: white;
   transform: scale(1.05);
+}
+
+/* ← NEW: "View Details" link in overlay */
+.detailBtn {
+  background: transparent;
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+.detailBtn:hover {
+  background: white;
+  color: #667eea;
+  border-color: white;
 }
 
 .badge {
@@ -186,7 +209,7 @@
   cursor: default;
 }
 
-/* QUICK VIEW MODAL */
+/* ── QUICK VIEW MODAL ── */
 .modal {
   position: fixed;
   top: 0;
@@ -203,8 +226,12 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modalContent {
@@ -219,8 +246,14 @@
 }
 
 @keyframes slideUp {
-  from { transform: translateY(50px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .closeBtn {
@@ -298,6 +331,14 @@
   color: #667eea;
 }
 
+/* ← NEW: wraps Add to Cart + View Full Details */
+.modalActions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
 .addBtn {
   width: 100%;
   padding: 16px;
@@ -309,7 +350,6 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: 20px;
 }
 
 .addBtn:hover {
@@ -317,18 +357,35 @@
   box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
 }
 
-/* Responsive Design */
+/* ← NEW: "View Full Details →" link inside modal */
+.detailLink {
+  display: block;
+  text-align: center;
+  padding: 12px;
+  border: 2px solid #667eea;
+  color: #667eea;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.detailLink:hover {
+  background: #667eea;
+  color: white;
+}
+
+/* ── RESPONSIVE ── */
 @media (max-width: 768px) {
   .modalGrid {
     grid-template-columns: 1fr;
     gap: 20px;
     padding: 20px;
   }
-
   .modalInfo h2 {
     font-size: 22px;
   }
-
   .closeBtn {
     top: 10px;
     right: 10px;
@@ -339,42 +396,33 @@
   .content {
     padding: 12px;
   }
-
   .name {
     font-size: 14px;
     min-height: 35px;
   }
-
   .price {
     font-size: 18px;
   }
-
   .button {
     padding: 8px 10px;
     font-size: 12px;
   }
-
   .viewBtn {
     padding: 10px 20px;
     font-size: 13px;
   }
-
   .modal {
     padding: 10px;
   }
-
   .modalContent {
     max-height: 95vh;
   }
-
   .modalGrid {
     padding: 15px;
   }
-
   .modalInfo h2 {
     font-size: 18px;
   }
-
   .addBtn {
     padding: 12px;
     font-size: 14px;

@@ -4,12 +4,15 @@ import { useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { getAllProducts, searchProducts } from "@/lib/products";
+import { useSnackbar } from "@/context/SnackbarContext";
 import ProductCard from "@/component/ProductCard";
 import styles from "./Products.module.css";
 
 export default function ProductsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { showSnackbar } = useSnackbar();
+
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,14 +42,14 @@ export default function ProductsPage() {
 
     if (selectedCategory !== "All") {
       result = result.filter(
-        (product) => product.category === selectedCategory
+        (product) => product.category === selectedCategory,
       );
     }
 
     if (searchTerm.trim()) {
       const searched = searchProducts(searchTerm);
       result = result.filter((product) =>
-        searched.some((p) => p.id === product.id)
+        searched.some((p) => p.id === product.id),
       );
     }
 
@@ -54,40 +57,32 @@ export default function ProductsPage() {
   }, [searchTerm, selectedCategory, products]);
 
   const handleAddToCart = (product) => {
-    setCartItems([...cartItems, product]);
-    setCartCount(cartCount + 1);
+    setCartItems((prev) => [...prev, product]);
+    setCartCount((prev) => prev + 1);
+    // Snackbar is shown inside ProductCard itself
   };
 
-  const handleCheckout = async () => {
-    try {
-      const response = await fetch("/api/checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ cartItems }),
-      });
+  const handleRemoveFromCart = (index) => {
+    const removed = cartItems[index];
+    setCartItems((prev) => prev.filter((_, i) => i !== index));
+    setCartCount((prev) => prev - 1);
+    showSnackbar(`"${removed.name}" removed from cart.`, "warning");
+  };
 
-      const data = await response.json();
-
-      if (response.ok) {
-        // Show success message
-        alert("✅ Order placed successfully! Your order has been added to your dashboard.");
-        // Clear cart
-        setCartItems([]);
-        setCartCount(0);
-        setShowCart(false);
-        // Redirect to dashboard
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 1000);
-      } else {
-        alert("❌ " + (data.error || "Failed to place order"));
-      }
-    } catch (error) {
-      console.error("Checkout error:", error);
-      alert("❌ Error placing order");
+  const handleCheckout = () => {
+    if (cartItems.length === 0) {
+      showSnackbar("Your cart is empty!", "warning");
+      return;
     }
+    sessionStorage.setItem("checkoutCart", JSON.stringify(cartItems));
+    setShowCart(false);
+    router.push("/checkout");
+  };
+
+  const handleLogout = async () => {
+    showSnackbar("👋 Logged out successfully. See you soon!", "info");
+    await new Promise((r) => setTimeout(r, 800));
+    signOut({ callbackUrl: "/login" });
   };
 
   if (status === "loading" || loading) {
@@ -99,9 +94,7 @@ export default function ProductsPage() {
     );
   }
 
-  if (!session) {
-    return null;
-  }
+  if (!session) return null;
 
   const categories = [
     "All",
@@ -139,9 +132,14 @@ export default function ProductsPage() {
               📊
             </button>
 
-            <div className={styles.navItem} onClick={() => setShowCart(!showCart)}>
+            <div
+              className={styles.navItem}
+              onClick={() => setShowCart(!showCart)}
+            >
               <span className={styles.cartIcon}>🛒</span>
-              {cartCount > 0 && <span className={styles.cartBadge}>{cartCount}</span>}
+              {cartCount > 0 && (
+                <span className={styles.cartBadge}>{cartCount}</span>
+              )}
             </div>
 
             <div className={styles.userMenu}>
@@ -156,10 +154,7 @@ export default function ProductsPage() {
                 <div className={styles.dropdownMenu}>
                   <div className={styles.menuItem}>{session.user.email}</div>
                   <hr className={styles.divider} />
-                  <button
-                    className={styles.logoutBtn}
-                    onClick={() => signOut({ callbackUrl: "/login" })}
-                  >
+                  <button className={styles.logoutBtn} onClick={handleLogout}>
                     🚪 Logout
                   </button>
                 </div>
@@ -176,7 +171,9 @@ export default function ProductsPage() {
           <p className={styles.heroSubtitle}>
             Discover amazing products at unbeatable prices
           </p>
-          <p className={styles.heroText}>Hi, {session.user.name || session.user.email}! 👋</p>
+          <p className={styles.heroText}>
+            Hi, {session.user.name || session.user.email}! 👋
+          </p>
         </div>
       </div>
 
@@ -212,19 +209,18 @@ export default function ProductsPage() {
 
         {/* PRODUCTS SECTION */}
         <section className={styles.productsSection}>
-          {/* PRODUCTS HEADER */}
           <div className={styles.productsHeader}>
             <h2 className={styles.productsTitle}>
               {selectedCategory === "All" ? "All Products" : selectedCategory}
             </h2>
             <div className={styles.viewOptions}>
-              <button 
+              <button
                 className={`${styles.viewBtn} ${viewMode === "grid" ? styles.active : ""}`}
                 onClick={() => setViewMode("grid")}
               >
                 Grid
               </button>
-              <button 
+              <button
                 className={`${styles.viewBtn} ${viewMode === "list" ? styles.active : ""}`}
                 onClick={() => setViewMode("list")}
               >
@@ -233,7 +229,6 @@ export default function ProductsPage() {
             </div>
           </div>
 
-          {/* PRODUCTS GRID/LIST */}
           {filteredProducts.length > 0 ? (
             viewMode === "grid" ? (
               <div className={styles.productsGrid}>
@@ -250,19 +245,29 @@ export default function ProductsPage() {
                 {filteredProducts.map((product) => (
                   <div key={product.id} className={styles.listItem}>
                     <div className={styles.listItemImage}>
-                      <img src={product.image} alt={product.name} />
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        referrerPolicy="no-referrer"
+                      />
                     </div>
                     <div className={styles.listItemInfo}>
                       <h3 className={styles.listItemName}>{product.name}</h3>
-                      <p className={styles.listItemDescription}>{product.description}</p>
+                      <p className={styles.listItemDescription}>
+                        {product.description}
+                      </p>
                       <div className={styles.listItemMeta}>
-                        <span className={styles.listItemCategory}>{product.category}</span>
-                        <span className={styles.listItemRating}>⭐ {product.rating} ({product.reviews} reviews)</span>
+                        <span className={styles.listItemCategory}>
+                          {product.category}
+                        </span>
+                        <span className={styles.listItemRating}>
+                          ⭐ {product.rating} ({product.reviews} reviews)
+                        </span>
                       </div>
                     </div>
                     <div className={styles.listItemAction}>
                       <p className={styles.listItemPrice}>₹{product.price}</p>
-                      <button 
+                      <button
                         className={styles.addToCartBtn}
                         onClick={() => handleAddToCart(product)}
                       >
@@ -302,17 +307,29 @@ export default function ProductsPage() {
           <div className={styles.footerColumn}>
             <h4>Quick Links</h4>
             <ul>
-              <li><a href="#products">Products</a></li>
-              <li><a href="#about">About Us</a></li>
-              <li><a href="#contact">Contact</a></li>
+              <li>
+                <a href="#products">Products</a>
+              </li>
+              <li>
+                <a href="#about">About Us</a>
+              </li>
+              <li>
+                <a href="#contact">Contact</a>
+              </li>
             </ul>
           </div>
           <div className={styles.footerColumn}>
             <h4>Customer Service</h4>
             <ul>
-              <li><a href="#help">Help Center</a></li>
-              <li><a href="#returns">Returns</a></li>
-              <li><a href="#shipping">Shipping Info</a></li>
+              <li>
+                <a href="#help">Help Center</a>
+              </li>
+              <li>
+                <a href="#returns">Returns</a>
+              </li>
+              <li>
+                <a href="#shipping">Shipping Info</a>
+              </li>
             </ul>
           </div>
           <div className={styles.footerColumn}>
@@ -332,10 +349,18 @@ export default function ProductsPage() {
       {/* CART DRAWER */}
       {showCart && (
         <div className={styles.cartOverlay} onClick={() => setShowCart(false)}>
-          <div className={styles.cartDrawer} onClick={(e) => e.stopPropagation()}>
+          <div
+            className={styles.cartDrawer}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className={styles.cartHeader}>
               <h2>🛒 Your Cart</h2>
-              <button className={styles.closeCart} onClick={() => setShowCart(false)}>✕</button>
+              <button
+                className={styles.closeCart}
+                onClick={() => setShowCart(false)}
+              >
+                ✕
+              </button>
             </div>
 
             <div className={styles.cartContent}>
@@ -344,17 +369,19 @@ export default function ProductsPage() {
                   <div className={styles.cartItems}>
                     {cartItems.map((item, index) => (
                       <div key={index} className={styles.cartItem}>
-                        <img src={item.image} alt={item.name} className={styles.cartItemImage} />
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className={styles.cartItemImage}
+                          referrerPolicy="no-referrer"
+                        />
                         <div className={styles.cartItemInfo}>
                           <h4>{item.name}</h4>
                           <p className={styles.cartItemPrice}>₹{item.price}</p>
                         </div>
-                        <button 
+                        <button
                           className={styles.removeBtn}
-                          onClick={() => {
-                            setCartItems(cartItems.filter((_, i) => i !== index));
-                            setCartCount(cartCount - 1);
-                          }}
+                          onClick={() => handleRemoveFromCart(index)}
                         >
                           ✕
                         </button>
@@ -364,16 +391,26 @@ export default function ProductsPage() {
 
                   <div className={styles.cartFooter}>
                     <div className={styles.cartTotal}>
-                      Subtotal: <strong>₹{cartItems.reduce((sum, item) => sum + item.price, 0)}</strong>
+                      Subtotal:{" "}
+                      <strong>
+                        ₹{cartItems.reduce((sum, item) => sum + item.price, 0)}
+                      </strong>
                     </div>
-                    <button className={styles.checkoutBtn} onClick={handleCheckout}>🔒 Proceed to Checkout</button>
+                    <button
+                      className={styles.checkoutBtn}
+                      onClick={handleCheckout}
+                    >
+                      🔒 Proceed to Checkout
+                    </button>
                   </div>
                 </>
               ) : (
                 <div className={styles.emptyCart}>
                   <p className={styles.emptyCartIcon}>🛒</p>
                   <p className={styles.emptyCartText}>Your cart is empty</p>
-                  <p className={styles.emptyCartSubtext}>Add items from the store to get started!</p>
+                  <p className={styles.emptyCartSubtext}>
+                    Add items from the store to get started!
+                  </p>
                 </div>
               )}
             </div>

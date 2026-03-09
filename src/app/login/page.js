@@ -4,11 +4,13 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useSnackbar } from "@/context/SnackbarContext";
 import styles from "./Login.module.css";
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { showSnackbar } = useSnackbar();
 
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
@@ -36,9 +38,13 @@ export default function LoginPage() {
 
     if (result?.error) {
       setError(result.error);
+      showSnackbar("Invalid email or password. Please try again.", "error");
       return;
     }
 
+    showSnackbar("🎉 Welcome back! Login successful.", "success");
+    // Small delay so snackbar is visible before navigation
+    await new Promise((r) => setTimeout(r, 700));
     router.push(callbackUrl);
     router.refresh();
   };

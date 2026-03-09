@@ -7,23 +7,25 @@ export async function POST(request) {
     const session = await getServerSession(authOptions);
 
     if (!session) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401 }
-      );
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+      });
     }
 
-    const { cartItems } = await request.json();
+    const { cartItems, address, paymentMethod, total } = await request.json();
 
     if (!cartItems || cartItems.length === 0) {
-      return new Response(
-        JSON.stringify({ error: "Cart is empty" }),
-        { status: 400 }
-      );
+      return new Response(JSON.stringify({ error: "Cart is empty" }), {
+        status: 400,
+      });
     }
 
-    // Create the order
-    const order = createOrder(session.user.email, cartItems);
+    // Create the order — pass extra metadata if createOrder supports it
+    const order = createOrder(session.user.email, cartItems, {
+      address,
+      paymentMethod,
+      total,
+    });
 
     return new Response(
       JSON.stringify({
@@ -31,13 +33,12 @@ export async function POST(request) {
         order,
         message: "Order placed successfully!",
       }),
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Checkout error:", error);
-    return new Response(
-      JSON.stringify({ error: "Failed to create order" }),
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: "Failed to create order" }), {
+      status: 500,
+    });
   }
 }

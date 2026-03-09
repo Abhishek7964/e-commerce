@@ -1,11 +1,44 @@
+/* ── LOADING ── */
+.loadingScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  gap: 20px;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── WRAPPER ── */
 .wrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   background-color: #f8f9fa;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, sans-serif;
 }
 
+/* ── NAVBAR ── */
 .navbar {
   position: sticky;
   top: 0;
@@ -43,6 +76,7 @@
   font-weight: 500;
 }
 
+/* ── CONTAINER ── */
 .container {
   flex: 1;
   padding: 40px 30px;
@@ -51,12 +85,18 @@
   width: 100%;
 }
 
+/* ── HEADER ── */
 .header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   padding: 40px;
   border-radius: 12px;
   margin-bottom: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .header h1 {
@@ -72,6 +112,24 @@
   margin: 0;
 }
 
+.addMoreBtn {
+  background: white;
+  color: #667eea;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.addMoreBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* ── EMPTY STATE ── */
 .content {
   background: white;
   border-radius: 8px;
@@ -101,70 +159,250 @@
 .emptyState p {
   color: #666;
   margin-bottom: 30px;
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .ctaButton {
+  display: inline-block;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  border: none;
   padding: 12px 28px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-weight: 600;
-  cursor: pointer;
   font-size: 14px;
+  text-decoration: none;
   transition: all 0.3s;
 }
 
 .ctaButton:hover {
-  opacity: 0.9;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
 }
 
-.info {
-  background: white;
-  padding: 20px 25px;
-  border-radius: 8px;
+/* ── GRID ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
   margin-bottom: 40px;
-  color: #333;
-  border-left: 4px solid #667eea;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-.info p {
+/* ── CARD ── */
+.card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e9ecef;
+  position: relative;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.13);
+}
+
+.removeBtn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+  background: white;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  transition: all 0.2s;
+}
+
+.removeBtn:hover {
+  background: #ff6b6b;
+  color: white;
+}
+
+.imageLink {
+  display: block;
+}
+
+.imageWrap {
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: #f8f9fa;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.card:hover .image {
+  transform: scale(1.06);
+}
+
+/* ── CARD INFO ── */
+.cardInfo {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.category {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #667eea;
+}
+
+.nameLink {
+  text-decoration: none;
+}
+
+.name {
   margin: 0;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a2e;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
+.nameLink:hover .name {
+  color: #667eea;
+}
+
+.ratingRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.stars {
+  display: flex;
+  gap: 1px;
+}
+.starFilled {
+  color: #f59e0b;
+  font-size: 13px;
+}
+.starEmpty {
+  color: #d1d5db;
+  font-size: 13px;
+}
+.ratingText {
+  font-size: 12px;
+  color: #888;
+}
+
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.price {
+  font-size: 20px;
+  font-weight: 800;
+  color: #667eea;
+}
+
+.originalPrice {
+  font-size: 13px;
+  color: #bbb;
+  text-decoration: line-through;
+}
+
+.viewBtn {
+  display: block;
+  text-align: center;
+  padding: 10px;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #667eea;
+  text-decoration: none;
+  transition: all 0.2s;
+  margin-top: 4px;
+}
+
+.viewBtn:hover {
+  background: #667eea;
+  color: white;
+}
+
+/* ── BACK LINK ── */
 .backLink {
   text-align: center;
+  margin-top: 20px;
 }
 
 .backLink a {
   color: #667eea;
   text-decoration: none;
   font-weight: 600;
-  transition: opacity 0.3s ease;
   font-size: 14px;
+  transition: opacity 0.2s;
 }
 
 .backLink a:hover {
-  opacity: 0.8;
+  opacity: 0.75;
 }
 
+/* ── RESPONSIVE ── */
 @media (max-width: 768px) {
   .header {
     padding: 25px;
+    flex-direction: column;
+    align-items: flex-start;
   }
-
   .header h1 {
     font-size: 24px;
   }
-
-  .content {
-    padding: 40px 20px;
-  }
-
   .container {
     padding: 20px 15px;
+  }
+  .content {
+    padding: 20px;
+  }
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .name {
+    font-size: 13px;
+  }
+  .price {
+    font-size: 16px;
+  }
+  .cardInfo {
+    padding: 12px;
+    gap: 6px;
   }
 }
